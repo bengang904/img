@@ -20,18 +20,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
         <h1>2024-10-24.zip</h1>
         <div class="divider"></div>
         <p>相册存档</p>
     </header>
-
     <div class="gallery" id="galleryContainer">
         </div>
-
     <div id="lightbox"><img src="" alt="查看原图"></div>
-
     <script>
         const container = document.getElementById('galleryContainer');
         const lightbox = document.getElementById('lightbox');
@@ -41,68 +37,50 @@
             rootMargin: '200px 0px', 
             threshold: 0.01
         };
-
         const imgObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const img = entry.target;
                     const card = img.parentElement;
                     img.src = img.dataset.src;
-                    
                     img.onload = () => {
                         img.classList.add('loaded');
                         card.classList.remove('loading'); 
                     };
-                    
                     observer.unobserve(img); 
                 }
             });
         }, observerOptions);
-
-        // 2. 异步获取数据
         async function loadGallery() {
             try {
                 const response = await fetch('data.json');
                 if (!response.ok) throw new Error('数据加载失败');
                 const data = await response.json();
-                
                 container.innerHTML = '';
-                
-                // 使用 Fragment 优化性能，减少重绘
                 const fragment = document.createDocumentFragment();
-
                 data.forEach(item => {
                     const card = document.createElement('div');
                     card.className = `gallery-item ${item.type || 'normal'} loading`;
-                    
-                    // 使用 data-src 存储真实地址实现懒加载
                     card.innerHTML = `
                         <img data-src="${item.url}" alt="${item.title}">
                         <div class="overlay"><span>${item.title}</span></div>
                     `;
-
                     card.addEventListener('click', () => {
                         lbImg.src = item.url;
                         lightbox.style.display = 'flex';
                         document.body.style.overflow = 'hidden';
                     });
-
                     fragment.appendChild(card);
                 });
-
                 container.appendChild(fragment);
-
-                // 3. 启动观察
                 const images = container.querySelectorAll('img');
                 images.forEach(img => imgObserver.observe(img));
-
             } catch (error) {
                 container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 50px; color: #ff7675;">
                     加载错误: ${error.message} <br> 请确保使用 HTTP 服务器（如 Live Server）运行。
                 </div>`;
             }
         }
-
         lightbox.addEventListener('click', () => {
             lightbox.style.display = 'none';
             document.body.style.overflow = 'auto';
@@ -115,5 +93,6 @@
 </body>
 
 </html>
+
 
 
